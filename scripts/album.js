@@ -36,7 +36,7 @@ var createSongRow = function(songNumber, songName, songLength) {
         '<tr class="album-view-song-item">'
     +   '   <td class="song-item-number" data-song-number="' + songNumber + '">' + songNumber + '</td>'
     +   '   <td class="song-item-title">' + songName + '</td>'
-    +   '   <td class="song-item-duration">' + songLength + '</td>'
+    +   '   <td class="song-item-duration">' + filterTimeCode(songLength) + '</td>'
     +   '</tr>'
     ;
     
@@ -144,9 +144,49 @@ var updateSeekBarWhileSongPlays = function() {
           var $seekBar = $('.seek-control .seek-bar');
           
           updateSeekPercentage($seekBar, seekBarFillRatio);
+          
+          console.log(this.getTime());
+          setCurrentTimeInPlayerBar(this.getTime());
       });
-      
   }  
+};
+
+var filterTimeCode = function(timeInSeconds) {
+    // use the parseFloat() method to get the seconds in number form
+    // store variable for whole seconds and whole minutes --> Math.floor()
+    // return the time in the format X:XX
+    
+    var num = parseInt(timeInSeconds, 10);
+    var hours = Math.floor(num / 3600);
+    var minutes = Math.floor((num - (hours * 3600)) / 60);
+    var seconds = num - (hours * 3600) - (minutes * 60);
+    
+    if (seconds < 10) {seconds = "0" + seconds;}
+    
+    return minutes + ':' + seconds;
+    
+};
+
+var setCurrentTimeInPlayerBar = function(currentTime) {
+
+    // code sets the text of the element with the '.current-time' to the current time in the song ...
+    // start with 0 and add as time progresses
+    
+    var startTime = document.getElementsByClassName('current-time');
+    var replaceStr = "<div class='current-time'>" + filterTimeCode(currentTime) + "</div>";
+    $("div.current-time").replaceWith(replaceStr);
+    
+};
+
+var setTotalTimeInPlayerBar = function(totalTime) {
+
+    // code sets the text of the element with the '.total-time' to the length of the song ...
+    // duration from fixtures.js
+    
+    var duration = document.getElementsByClassName('total-time');
+    var replaceStr = "<div class='total-time'>" + filterTimeCode(totalTime) + "</div>";
+    $("div.total-time").replaceWith(replaceStr);
+    
 };
 
 var updateSeekPercentage = function($seekBar, seekBarFillRatio) {
@@ -277,6 +317,9 @@ var updatePlayerBarSong = function() {
     $('.currently-playing .artist-name').text(currentAlbum.artist);
     $('.currently-playing .artist-song-mobile').text(currentSongFromAlbum.title + " - " + currentAlbum.artist);
     $('.main-controls .play-pause').html(playerBarPauseButton);
+    
+    setTotalTimeInPlayerBar(currentSongFromAlbum.duration);
+   
 };
 
 // Album button templates
